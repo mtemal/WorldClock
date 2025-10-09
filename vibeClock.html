@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>World Time Zones</title>
+<style>
+  body {font-family: Arial, sans-serif; margin: 20px;}
+  h1 {margin-bottom: 0;}
+  .controls {margin: 20px 0;}
+  table {border-collapse: collapse; width: 100%;}
+  th, td {border: 1px solid #ccc; padding: 8px; text-align: left;}
+  th {background: #f0f0f0;}
+</style>
+</head>
+<body>
+
+<h1>World Time Zones</h1>
+
+<div class="controls">
+  <label for="zoneSelect">Pick a zone:</label>
+  <select id="zoneSelect"></select>
+  <span id="selectedTime"></span>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Location Identifier </th>
+      <th>Current Time</th>
+    </tr>
+  </thead>
+  <tbody id="timeTable">
+    <!-- rows inserted by script -->
+  </tbody>
+</table>
+
+<script>
+/* ---------- Configuration ---------- */
+const zones = [
+  'UTC',
+  'America/New_York',
+  'America/Los_Angeles',
+  'Europe/London',
+  'Europe/Paris',
+  'Asia/Tokyo',
+  'Australia/Sydney',
+  'Africa/Johannesburg',
+  'America/Sao_Paulo',
+  'Asia/Kolkata',
+  'Asia/Dubai',
+  'Europe/Moscow',
+];
+
+/* ---------- Helper to format time ---------- */
+function formatDate(date, zone) {
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: zone,
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  }).format(date);
+}
+
+/* ---------- Build UI ---------- */
+const select = document.getElementById('zoneSelect');
+const tableBody = document.getElementById('timeTable');
+const selectedTimeEl = document.getElementById('selectedTime');
+
+// Populate <select>
+zones.forEach(z => {
+  const opt = document.createElement('option');
+  opt.value = z;
+  opt.textContent = z;
+  select.appendChild(opt);
+});
+
+// Build table rows
+zones.forEach(z => {
+  const tr = document.createElement('tr');
+  const tdZone = document.createElement('td');
+  const tdTime = document.createElement('td');
+  tdZone.textContent = z;
+  tdTime.id = `time-${z}`;          // id for later updates
+  tr.appendChild(tdZone);
+  tr.appendChild(tdTime);
+  tableBody.appendChild(tr);
+});
+
+/* ---------- Update Times ---------- */
+function updateTimes() {
+  const now = new Date();
+  zones.forEach(z => {
+    const elem = document.getElementById(`time-${z}`);
+    elem.textContent = formatDate(now, z);
+  });
+
+  // Also update selected zone display
+  const selectedZone = select.value;
+  selectedTimeEl.textContent =
+    `Current time in ${selectedZone}: ${formatDate(now, selectedZone)}`;
+}
+
+// Initial update + interval
+updateTimes();
+setInterval(updateTimes, 1000);
+
+/* ---------- Respond to user selection ---------- */
+select.addEventListener('change', updateTimes);
+
+// Trigger once to show default selected zone immediately
+updateTimes();
+</script>
+
+</body>
+</html>
+
