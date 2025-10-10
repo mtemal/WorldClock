@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>World Clock & Countdown Timer</title>
+<style>
+  body{
+    font-family:Arial,sans-serif;
+    margin:0; padding:20px;
+    background:#f9f9f9;
+  }
+  h1{margin-top:0;}
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+    gap:20px;
+  }
+  .card{
+    background:#fff;
+    border-radius:8px;
+    box-shadow:0 2px 6px rgba(0,0,0,.1);
+    padding:15px;
+  }
+  table{width:100%; border-collapse:collapse;}
+  th,td{padding:8px; text-align:left;}
+  th{background:#ececec;}
+  .timer{font-size:1.5em; text-align:center; margin-top:10px;}
+  .btn{padding:6px 12px; margin-top:10px;}
+  .btn:hover{cursor:pointer; background:#e0e0e0;}
+</style>
+</head>
+<body>
+
+<h1>World Clock & Countdown Timer</h1>
+
+<!-- Countdown Section (now on top) -->
+<section>
+  <h2>Countdown Timer</h2>
+  <form id="countdown-form" onsubmit="return false;">
+    <label for="target-datetime">Select future date & time:</label><br>
+    <input type="datetime-local" id="target-datetime" required><br>
+    <button type="button" class="btn" id="start-btn">Start Countdown</button>
+    <button type="button" class="btn" id="stop-btn" style="display:none;">Stop Countdown</button>
+  </form>
+  <div id="timer-display" class="timer"></div>
+</section>
+
+<!-- World Clock Section -->
+<section>
+  <h2>World Clocks</h2>
+  <div class="grid" id="clocks"></div>
+</section>
+
+<script>
+/* ------------------- World Clock ------------------- */
+const timeZones = [
+  'UTC',
+  'America/New_York',
+  'America/Los_Angeles',
+  'Europe/London',
+  'Europe/Paris',
+  'Europe/Berlin',
+  'Asia/Tokyo',
+  'Asia/Shanghai',
+  'Asia/Kolkata',
+  'Australia/Sydney',
+  'Africa/Johannesburg',
+  'America/Sao_Paulo'
+];
+
+function pad(n){ return n.toString().padStart(2,'0'); }
+
+function formatDateTime(date, zone){
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute:'2-digit', second:'2-digit',
+    hour12:false, timeZone: zone
+  });
+  return formatter.format(date);
+}
+
+function updateClocks(){
+  const container = document.getElementById('clocks');
+  container.innerHTML = ''; // clear previous
+  const now = new Date();
+  timeZones.forEach(zone=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    const title = document.createElement('h3');
+    title.textContent = zone;
+    const timeEl = document.createElement('p');
+    timeEl.textContent = formatDateTime(now, zone);
+    card.appendChild(title);
+    card.appendChild(timeEl);
+    container.appendChild(card);
+  });
+}
+
+// update every second
+setInterval(updateClocks,1000);
+updateClocks(); // first instant
+
+/* ------------------- Countdown Timer ------------------- */
+let countdownInterval = null;
+let targetTimestamp = null;
+
+const timerDisplay = document.getElementById('timer-display');
+const startBtn = document.getElementById('start-btn');
+const stopBtn  = document.getElementById('stop-btn');
+const targetInput = document.getElementById('target-datetime');
+
+function startCountdown(){
+  const val = targetInput.value;
+  if(!val){ alert('Please choose a future date & time'); return; }
+  const target = new Date(val);
+  if(target <= new Date()){ alert('Choose a date/time in the future'); return; }
+  targetTimestamp = target.getTime();
+
+  // UI tweaks
+  startBtn.style.display = 'none';
+  stopBtn.style.display = 'inline-block';
+  timerDisplay.textContent = 'Countdown started...';
+
+  // clear any previous interval
+  if(countdownInterval) clearInterval(countdownInterval);
+
+  countdownInterval = setInterval(updateCountdown, 1000);
+  updateCountdown(); // first instant
+}
+
+function stopCountdown(){
+  if(countdownInterval) clearInterval(countdownInterval);
+  countdownInterval = null;
+  timerDisplay.textContent = 'Countdown stopped.';
+  startBtn.style.display = 'inline-block';
+  stopBtn.style.display = 'none';
+}
+
+function updateCountdown(){
+  const now = Date.now();
+  let diff = targetTimestamp - now;
+  if(diff <= 0){
+    clearInterval(countdownInterval);
+    timerDisplay.textContent = "Time's up!";
+    startBtn.style.display = 'inline-block';
+    stopBtn.style.display = 'none';
+    return;
+  }
+  const days = Math.floor(diff / (24*60*60*1000));
+  diff -= days * 24*60*60*1000;
+  const hrs  = Math.floor(diff / (60*60*1000));
+  diff -= hrs * 60*60*1000;
+  const mins = Math.floor(diff / (60*1000));
+  diff -= mins * 60*1000;
+  const secs = Math.floor(diff / 1000);
+
+  timerDisplay.textContent = `${pad(days)}d ${pad(hrs)}h ${pad(mins)}m ${pad(secs)}s`;
+}
+
+startBtn.addEventListener('click', startCountdown);
+stopBtn.addEventListener('click', stopCountdown);
+</script>
+</body>
+</html>
+
