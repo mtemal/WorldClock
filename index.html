@@ -2,29 +2,49 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>World Clock with 12 zones + User Zone + Custom Clocks</title>
+<title>AtticNUC Clock Collection</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
 <style>
-  body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#fafafa;}
+  /* ---------- 1️⃣  Base Styles ---------- */
+  body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#fafafa;color:#333;}
   header{background:#3f51b5;color:#fff;padding:1rem;text-align:center;}
   .container{max-width:1200px;margin:auto;padding:1rem;}
-  .section{margin-bottom:2rem;background:#fff;padding:1rem;border-radius:5px;box-shadow:0 1px 3px rgba(0,0,0,.1);}
-  .section h2{margin-top:0;}
-  .clock-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;}
-  .clock{padding:.8rem;border-radius:5px;background:#e3f2fd;box-shadow:0 1px 2px rgba(0,0,0,.1);}
+  .section{margin-bottom:2rem;background:#fff;padding:1rem;border-radius:5px;
+           box-shadow:0 1px 3px rgba(0,0,0,.1);}
+  .section h2{margin-top:0;margin-bottom:.5rem;font-size:1.4rem;}
+  /* ---------- 2️⃣  Clock Grid ---------- */
+  .clock-grid{display:grid;
+              grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+              gap:1rem;}
+  /* ---------- 3️⃣  Clock Card ---------- */
+  .clock{padding:.8rem;border-radius:5px;background:#e3f2fd;
+         box-shadow:0 1px 2px rgba(0,0,0,.1);}
   .clock h3{margin:0 0 .4rem 0;font-size:1.1rem;}
   .clock p{margin:0;font-size:1.4rem;}
-  .timer{display:flex;gap:.4rem;align-items:center;}
-  .timer input{width:60px;text-align:center;padding:.4rem;border:1px solid #ccc;border-radius:3px;}
-  .timer button{padding:.4rem .8rem;background:#3f51b5;color:#fff;border:none;border-radius:3px;cursor:pointer;}
-  .add-gmt{display:flex;gap:.4rem;align-items:center;}
-  .add-gmt input{flex:1;padding:.4rem;border:1px solid #ccc;border-radius:3px;}
-  .add-gmt button{padding:.4rem .8rem;background:#4caf50;color:#fff;border:none;border-radius:3px;cursor:pointer;}
-  .user-zone{display:flex;gap:.4rem;align-items:center;}
-  .user-zone select{flex:1;padding:.4rem;border:1px solid #ccc;border-radius:3px;}
+  .clock button{margin-top:.4rem;background:#d32f2f;color:#fff;border:none;
+                padding:.4rem .8rem;border-radius:3px;cursor:pointer;
+                font-size:.9rem;display:block;width:100%;}
+  .clock button:hover{background:#b71c1c;}
+  /* ---------- 4️⃣  Controls ---------- */
+  .timer, .add-gmt, .user-zone{display:flex;gap:.4rem;align-items:center;}
+  .timer input, .add-gmt input, .user-zone select{
+    width:60px; padding:.4rem;border:1px solid #ccc;border-radius:3px;
+    text-align:center;font-size:.9rem;}
+  .timer button, .add-gmt button{padding:.4rem .8rem;background:#3f51b5;color:#fff;
+                                 border:none;border-radius:3px;cursor:pointer;}
+  .timer button:hover, .add-gmt button:hover{background:#303f9f;}
+  /* ---------- 5️⃣  Responsive Tweaks ---------- */
+  @media (max-width: 600px) {
+    .clock-grid{grid-template-columns:1fr;}
+    .timer, .add-gmt, .user-zone{flex-direction:column;align-items:stretch;}
+    .timer input, .add-gmt input, .user-zone select{width:100%;}
+  }
 </style>
 </head>
 <body>
-<header>World Clock with 12 zones + User Selectale Zone + Custom Clocks</header>
+<header>AtticNUC Clock Collection</header>
 <div class="container">
 
   <!-- 1️⃣ 10‑Location Timer -->
@@ -67,36 +87,26 @@
 </div>
 
 <script>
-/* --------------------------------------------------------------------
-   1️⃣  PRESET_ZONES – 12 fixed zones to display
-   -------------------------------------------------------------------- */
+/* ---------- 1️⃣  PRESET_ZONES – 12 fixed zones to display ---------- */
 const PRESET_ZONES = [
-    // 0
-  'America/New_York',     // 1
+  'America/New_York',
   'America/Denver',
   'America/Chicago',
   'America/Los_Angeles',
   'Pacific/Honolulu',
-  'Europe/London',        // 2
-  'Europe/Paris',         // 3
-  'Europe/Berlin',           // 4
+  'Europe/London',
+  'Europe/Paris',
+  'Europe/Berlin',
   'Europe/Moscow',
   'Asia/Shanghai',
-  'Asia/Tokyo',        // 6
-  'Australia/Sydney'     // 7
-
+  'Asia/Tokyo',
+  'Australia/Sydney'
 ];
 
-/* --------------------------------------------------------------------
-   2️⃣  All IANA zones (used for the user drop‑down)
-   -------------------------------------------------------------------- */
+/* ---------- 2️⃣  All IANA zones (used for the user drop‑down) ---------- */
 const ALL_ZONES = [
-  // … (the full list from the original solution – shortened here for brevity)
-  //'America/Los_Angeles','America/New_York','Europe/London','Europe/Paris',
-  //'Asia/Tokyo','Asia/Shanghai','Europe/Berlin','Australia/Sydney',
-  //'America/Chicago','Europe/Moscow','Asia/Dubai','Asia/Kolkata',
-  // add the rest as needed…
-  
+  /* … a full list – trimmed for brevity … */
+
     "Africa/Abidjan","Africa/Accra","Africa/Addis_Ababa","Africa/Algiers","Africa/Asmara",
   "Africa/Bamako","Africa/Bangui","Africa/Banjul","Africa/Bissau","Africa/Blantyre",
   "Africa/Brazzaville","Africa/Bujumbura","Africa/Cairo","Africa/Casablanca","Africa/Ceuta",
@@ -174,11 +184,10 @@ const ALL_ZONES = [
   "Asia/Phnom_Penh","Asia/Pontianak","Asia/Qyzylorda","Asia/Samarkand","Asia/Sakhalin",
   "Asia/Singapore","Asia/Tashkent","Asia/Tbilisi","Asia/Ulaanbaatar","Asia/Urumqi",
   "Asia/Ust-Nera","Asia/Vientiane","Asia/Vladivostok"
+  // add the rest you need
 ];
 
-/* --------------------------------------------------------------------
-   3️⃣  Countdown Timer logic
-   -------------------------------------------------------------------- */
+/* ---------- 3️⃣  Countdown Timer logic ---------- */
 let countdown = 0, countdownInterval = null;
 const display = document.getElementById('cnt-display');
 
@@ -206,9 +215,7 @@ document.getElementById('cnt-reset').onclick = () => {
   clearInterval(countdownInterval); countdown=0; updateCountdown();
 };
 
-/* --------------------------------------------------------------------
-   4️⃣  Clock element builder
-   -------------------------------------------------------------------- */
+/* ---------- 4️⃣  Clock element builder ---------- */
 function buildClock(zone, label){
   const d = document.createElement('div'); d.className='clock';
   d.dataset.zone = zone;
@@ -218,15 +225,11 @@ function buildClock(zone, label){
   return d;
 }
 
-/* --------------------------------------------------------------------
-   5️⃣  12 fixed clocks
-   -------------------------------------------------------------------- */
+/* ---------- 5️⃣  12 fixed clocks ---------- */
 const fixedGrid = document.getElementById('fixed-grid');
 PRESET_ZONES.forEach(z => fixedGrid.appendChild(buildClock(z, z)));
 
-/* --------------------------------------------------------------------
-   6️⃣  User‑selected zone
-   -------------------------------------------------------------------- */
+/* ---------- 6️⃣  User‑selected zone ---------- */
 const userZoneSelect = document.getElementById('zone-select');
 const userGrid = document.getElementById('user-grid');
 let userZone = null;   // {zone:string, element:HTMLElement}
@@ -246,18 +249,17 @@ function showUserZone(zone){
 userZoneSelect.addEventListener('change', e=>showUserZone(e.target.value));
 ALL_ZONES.forEach(z=>userZoneSelect.appendChild(new Option(z,z)));
 
-/* --------------------------------------------------------------------
-   7️⃣  Custom User clocks
-   -------------------------------------------------------------------- */
+/* ---------- 7️⃣  Custom User clocks ---------- */
 const customClocks = []; // {offsetMin:number, element:HTMLElement}
 document.getElementById('add-gmt').onclick = () => {
   const s = document.getElementById('gmt-offset').value.trim();
   if(!s) return;
   const m = parseGMTOffset(s);          // helper below
   const el = buildClock(`Custom ${s}`, `Custom ${s}`);
+  // add a small remove button inside the clock card
   const rem = document.createElement('button');
-  rem.textContent='✕'; rem.style.marginLeft='auto'; rem.style.fontSize='0.8rem';
-  rem.onclick = () => { userGrid.removeChild(el); customClocks.splice(customClocks.findIndex(c=>c.element===el),1); };
+  rem.textContent='✕';
+  rem.onclick = () => { customGrid.removeChild(el); customClocks.splice(customClocks.findIndex(c=>c.element===el),1); };
   el.appendChild(rem);
   document.getElementById('custom-grid').appendChild(el);
   customClocks.push({offsetMin:m, element:el});
@@ -270,9 +272,7 @@ function parseGMTOffset(str){
   return sign*(h*60+min);
 }
 
-/* --------------------------------------------------------------------
-   8️⃣  Global time updater
-   -------------------------------------------------------------------- */
+/* ---------- 8️⃣  Global time updater ---------- */
 function updateTimes(){
   const now = new Date();
   // fixed clocks
