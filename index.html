@@ -1,134 +1,63 @@
+Add a mobile friendly view to the code below
+
+
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <title>CSO Clocks</title>
 <style>
-  /* --------- Global --------- */
-  :root {
-    --clock-bg:#fff;
-    --clock-shadow:0 1px 3px rgba(0,0,0,.15);
-    --border-radius:6px;
-    --font-base:1rem;          /* 16px */
-    --font-large:1.1rem;
-    --font-very-large:1.6rem;
-    --btn-bg:#2d89ef;
-    --btn-fg:#fff;
-    --btn-radius:4px;
-  }
-
-  body{
-    font-family:Arial,Helvetica,sans-serif;
-    margin:0;
-    padding:1rem;
-    background:#f4f4f4;
-    color:#333;
-  }
-  h1{font-size:2rem;margin:0 0 .5rem}
-  h2{margin:1rem 0 .5rem;font-size:1.2rem}
-
-  /* --------- Clock grid --------- */
-  .clock-grid{
-    display:flex;
-    flex-wrap:wrap;
-    gap:1rem;
-  }
-  .clock{
-    flex:1 1 calc(50% - 1rem);   /* two columns on wide screens */
-    background:var(--clock-bg);
-    border-radius:var(--border-radius);
-    padding:1rem;
-    box-shadow:var(--clock-shadow);
-    min-width:200px;
-  }
-  .clock h3{margin:0 0 .3rem;font-size:var(--font-large)}
-  .time{font-size:var(--font-very-large);font-weight:600}
-
-  /* --------- Controls --------- */
-  .controls{
-    margin-top:.5rem;
-    display:flex;
-    flex-wrap:wrap;
-    gap:.5rem;
-    align-items:flex-end;
-  }
-  input[type="number"],
-  input[type="text"],
-  input[type="datetime-local"]{
-    padding:.5rem .6rem;
-    font-size:.9rem;
-    width:100%;
-    max-width:140px;
-    border:1px solid #ccc;
-    border-radius:var(--border-radius);
-  }
-  button{
-    padding:.4rem 1rem;
-    font-size:.9rem;
-    background:var(--btn-bg);
-    color:var(--btn-fg);
-    border:none;
-    border-radius:var(--btn-radius);
-    cursor:pointer;
-    white-space:nowrap;
-  }
+  body{font-family:Arial,Helvetica,sans-serif;margin:20px;background:#f4f4f4}
+  h2{margin:12px 0 6px}
+  .clock{background:#fff;border-radius:6px;padding:12px;margin-bottom:16px;
+         box-shadow:0 1px 3px rgba(0,0,0,.15)}
+  .clock h3{margin:0 0 4px;font-size:1.1rem}
+  .time{font-size:1.6rem;font-weight:600}
+  .controls{margin-top:8px}
+  input[type="number"],input[type="text"],input[type="datetime-local"]{
+    padding:4px 6px;font-size:0.9rem;margin-right:6px;width:140px}
+  button{padding:5px 10px;font-size:0.9rem;background:#2d89ef;color:#fff;border:none;border-radius:4px}
   button:hover{background:#1b5fbd}
-  button:focus{outline:2px solid #0056b3}
-
-  /* --------- Responsive tweaks --------- */
-  @media (max-width:480px){
-    body{padding:.5rem}
-    h1{font-size:1.8rem}
-    .clock{flex:1 1 100%}
-    .clock-grid{gap:.5rem}
-    input[type="number"],
-    input[type="text"],
-    input[type="datetime-local"]{
-      max-width:100%;
-    }
-  }
 </style>
 </head>
-
 <body>
+
 <h1>CSO Clocks</h1>
 
-<div class="clock-grid">
-  <!-- 1️⃣ EST Clock -->
-  <div class="clock" id="clock-est">
-    <h3>Washington D.C.</h3>
-    <div class="time" id="time-est">--:--:--</div>
-  </div>
+<!-- 1️⃣ EST Clock -->
+<div class="clock" id="clock-est">
+  <h3> Washington D.C.</h3>
+  <div class="time" id="time-est">--:--:--</div>
+</div>
 
-  <!-- 2️⃣ Custom Clock 1 -->
-  <div class="clock" id="clock-c1">
-    <h3>Origin Time</h3>
-    <div class="time" id="time-c1">--:--:--</div>
-    <div class="controls">
-      <input type="text" id="offset-c1" placeholder="+5.5 or -3">
-      <button id="set-c1">Set</button>
-    </div>
+<!-- 2️⃣ Custom Clock 1 -->
+<div class="clock" id="clock-c1">
+  <h3> Origin Time </h3>
+  <div class="time" id="time-c1">--:--:--</div>
+  <div class="controls">
+    <input type="text" id="offset-c1" placeholder="+5.5 or -3">
+    <button id="set-c1">Set</button>
   </div>
+</div>
 
-  <!-- 3️⃣ Custom Clock 2 -->
-  <div class="clock" id="clock-c2">
-    <h3>Destination Time</h3>
-    <div class="time" id="time-c2">--:--:--</div>
-    <div class="controls">
-      <input type="text" id="offset-c2" placeholder="+2 or -8.5">
-      <button id="set-c2">Set</button>
-    </div>
+<!-- 3️⃣ Custom Clock 2 -->
+<div class="clock" id="clock-c2">
+  <h3>Destination Time</h3>
+  <div class="time" id="time-c2">--:--:--</div>
+  <div class="controls">
+    <input type="text" id="offset-c2" placeholder="+2 or -8.5">
+    <button id="set-c2">Set</button>
   </div>
+</div>
 
-  <!-- 4️⃣ Countdown -->
-  <div class="clock" id="countdown">
-    <h3>ETA</h3>
-    <div class="time" id="time-remaining">--:--:--</div>
-    <div class="controls">
-      <input type="datetime-local" id="target-dt">
-      <button id="start-cd">Start</button>
-      <button id="reset-cd">Reset</button>
-    </div>
+<!-- 4️⃣ Countdown -->
+<div class="clock" id="countdown">
+  <h3>ETA</h3>
+  <div class="time" id="time-remaining">--:--:--</div>
+  <div class="controls">
+    <input type="datetime-local" id="target-dt">
+    <button id="start-cd">Start</button>
+    <button id="reset-cd">Reset</button>
   </div>
 </div>
 
@@ -148,43 +77,53 @@ updateEST();
 
 /* ---------- 2️⃣ Custom Clock 1 & 2 ---------- */
 const customClocks = [
-  {offsetInput:'offset-c1', setBtn:'set-c1', timeEl:'time-c1'},
-  {offsetInput:'offset-c2', setBtn:'set-c2', timeEl:'time-c2'}
+  {offsetInput:'offset-c1', setBtn:'set-c1', timeEl:'time-c1', displayEl:'clock-c1'},
+  {offsetInput:'offset-c2', setBtn:'set-c2', timeEl:'time-c2', displayEl:'clock-c2'}
 ];
 customClocks.forEach(cfg=>{
   const offsetEl = document.getElementById(cfg.offsetInput);
   const btn = document.getElementById(cfg.setBtn);
   const timeEl = document.getElementById(cfg.timeEl);
-  let minutesOffset = null;
+  let minutesOffset = null;        // minutes from UTC
   let interval = null;
 
   function setOffset(){
     const val = offsetEl.value.trim();
     if(!val) return alert('Enter a GMT offset (e.g. +5.5, -3)');
     const m = parseOffset(val);
-    if(m===null) return alert('Invalid offset. Use +5.5 or -3');
+    if(m===null) return alert('Invalid offset. Use +5.5 or -8');
     minutesOffset = m;
-    clearInterval(interval);
-    interval = setInterval(()=>displayOffset(timeEl, minutesOffset), 1000);
-    displayOffset(timeEl, minutesOffset);
+    if(interval) clearInterval(interval);
+    interval = setInterval(updateCustom, 1000);
+    updateCustom();
   }
+
+  function updateCustom(){
+    const utcNow = new Date();
+    const localMs = utcNow.getTime() + minutesOffset*60*1000;
+    const local = new Date(localMs);
+    const hh = pad(local.getUTCHours());
+    const mm = pad(local.getUTCMinutes());
+    const ss = pad(local.getUTCSeconds());
+    timeEl.textContent = `${hh}:${mm}:${ss}`;
+  }
+
   btn.addEventListener('click', setOffset);
 });
 
-/* ---------- Helper to parse offset ---------- */
+/* Parse strings like "+5.5" or "-3" to minutes (null on failure) */
 function parseOffset(str){
-  const re = /^([+-]?\d+)(?:\.(\d+))?$/;
-  const m = re.exec(str);
+  const m = str.match(/^([+-]?)(\d+)(?:\.(\d+))?$/);
   if(!m) return null;
-  let hours = parseInt(m[1],10);
-  let frac = m[2]||'0';
-  let minutes = 0;
-  // treat fractional part as *decimal* fraction of an hour
-  if(frac.length){
-    minutes = Math.round(parseFloat('0.'+frac) * 60);
-  }
-  return hours*60 + minutes;
+  let sign = m[1]==='-'? -1 : 1;
+  let hours = parseInt(m[2],10);
+  let minutes = m[3] ? Math.round(parseInt(m[3],10)* (m[3].length===1? 6 : 10)) : 0; // e.g. .5 -> 30
+  // if fraction is like .25 we treat 25*6 = 150? better: treat fraction as decimal fraction of hour
+  if(m[3] && m[3].length===1) { minutes = Math.round(parseInt(m[3],10)*60); }
+  return sign*(hours*60 + minutes);
 }
+
+/* Helper to pad numbers */
 function pad(n){return n.toString().padStart(2,'0');}
 
 /* ---------- 3️⃣ Countdown Timer ---------- */
@@ -205,6 +144,7 @@ function resetCountdown(){
   targetTime = null;
   targetInput.value = '';
 }
+
 function tickCountdown(){
   if(!targetTime) return;
   const now = new Date();
@@ -227,7 +167,11 @@ document.getElementById('start-cd').addEventListener('click',()=>{
   if(isNaN(targetTime)) return alert('Invalid date/time.');
   startCountdown();
 });
+
 document.getElementById('reset-cd').addEventListener('click', resetCountdown);
+
+
+
 </script>
 
 <h2>Note: The clocks above will function correctly only if the workstation’s clock is set to Zulu (UTC) time.</h2>
