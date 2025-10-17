@@ -1,295 +1,176 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>AtticNUC Clock Collection</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-
+<title>CSO Clocks</title>
 <style>
-  /* ---------- 1️⃣  Base Styles ---------- */
-  body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#fafafa;color:#333;}
-  header{background:#3f51b5;color:#fff;padding:1rem;text-align:center;}
-  .container{max-width:1200px;margin:auto;padding:1rem;}
-  .section{margin-bottom:2rem;background:#fff;padding:1rem;border-radius:5px;
-           box-shadow:0 1px 3px rgba(0,0,0,.1);}
-  .section h2{margin-top:0;margin-bottom:.5rem;font-size:1.4rem;}
-  /* ---------- 2️⃣  Clock Grid ---------- */
-  .clock-grid{display:grid;
-              grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-              gap:1rem;}
-  /* ---------- 3️⃣  Clock Card ---------- */
-  .clock{padding:.8rem;border-radius:5px;background:#e3f2fd;
-         box-shadow:0 1px 2px rgba(0,0,0,.1);}
-  .clock h3{margin:0 0 .4rem 0;font-size:1.1rem;}
-  .clock p{margin:0;font-size:1.4rem;}
-  .clock button{margin-top:.4rem;background:#d32f2f;color:#fff;border:none;
-                padding:.4rem .8rem;border-radius:3px;cursor:pointer;
-                font-size:.9rem;display:block;width:100%;}
-  .clock button:hover{background:#b71c1c;}
-  /* ---------- 4️⃣  Controls ---------- */
-  .timer, .add-gmt, .user-zone{display:flex;gap:.4rem;align-items:center;}
-  .timer input, .add-gmt input, .user-zone select{
-    width:60px; padding:.4rem;border:1px solid #ccc;border-radius:3px;
-    text-align:center;font-size:.9rem;}
-  .timer button, .add-gmt button{padding:.4rem .8rem;background:#3f51b5;color:#fff;
-                                 border:none;border-radius:3px;cursor:pointer;}
-  .timer button:hover, .add-gmt button:hover{background:#303f9f;}
-  /* ---------- 5️⃣  Responsive Tweaks ---------- */
-  @media (max-width: 600px) {
-    .clock-grid{grid-template-columns:1fr;}
-    .timer, .add-gmt, .user-zone{flex-direction:column;align-items:stretch;}
-    .timer input, .add-gmt input, .user-zone select{width:100%;}
-  }
+  body{font-family:Arial,Helvetica,sans-serif;margin:20px;background:#f4f4f4}
+  h2{margin:12px 0 6px}
+  .clock{background:#fff;border-radius:6px;padding:12px;margin-bottom:16px;
+         box-shadow:0 1px 3px rgba(0,0,0,.15)}
+  .clock h3{margin:0 0 4px;font-size:1.1rem}
+  .time{font-size:1.6rem;font-weight:600}
+  .controls{margin-top:8px}
+  input[type="number"],input[type="text"],input[type="datetime-local"]{
+    padding:4px 6px;font-size:0.9rem;margin-right:6px;width:140px}
+  button{padding:5px 10px;font-size:0.9rem;background:#2d89ef;color:#fff;border:none;border-radius:4px}
+  button:hover{background:#1b5fbd}
 </style>
 </head>
 <body>
-<header>AtticNUC Clock Collection</header>
-<div class="container">
 
-  <!-- 1️⃣ 10‑Location Timer -->
-  <div class="section">
-    <h2>ETA Countdown Timer</h2>
-    <div class="timer">
-      <input type="number" id="cnt-hours" placeholder="hh" min="0">
-      <input type="number" id="cnt-minutes" placeholder="mm" min="0" max="59">
-      <input type="number" id="cnt-seconds" placeholder="ss" min="0" max="59">
-      <button id="cnt-start">Start</button>
-      <button id="cnt-reset">Reset</button>
-    </div>
-    <p id="cnt-display" style="font-size:1.4rem;margin-top:.6rem;">00:00:00</p>
+<h1>CSO Clocks</h1>
+
+<!-- 1️⃣ EST Clock -->
+<div class="clock" id="clock-est">
+  <h3> Washington D.C.</h3>
+  <div class="time" id="time-est">--:--:--</div>
+</div>
+
+<!-- 2️⃣ Custom Clock 1 -->
+<div class="clock" id="clock-c1">
+  <h3> Origin Time </h3>
+  <div class="time" id="time-c1">--:--:--</div>
+  <div class="controls">
+    <input type="text" id="offset-c1" placeholder="+5.5 or -3">
+    <button id="set-c1">Set</button>
   </div>
+</div>
 
-  <!-- 2️⃣ 12 Fixed Clocks -->
-  <div class="section">
-    <h2>12 Fixed Clocks</h2>
-    <div class="clock-grid" id="fixed-grid"></div>
+<!-- 3️⃣ Custom Clock 2 -->
+<div class="clock" id="clock-c2">
+  <h3>Destination Time</h3>
+  <div class="time" id="time-c2">--:--:--</div>
+  <div class="controls">
+    <input type="text" id="offset-c2" placeholder="+2 or -8.5">
+    <button id="set-c2">Set</button>
   </div>
+</div>
 
-  <!-- 3️⃣ User‑Selected Zone -->
-  <div class="section">
-    <h2>Pick Any World Location to see its clock</h2>
-    <div class="user-zone">
-      <select id="zone-select"></select>
-    </div>
-    <div class="clock-grid" id="user-grid"></div>
-  </div>
-
-  <!-- 4️⃣ Custom GMT Clock -->
-  <div class="section">
-    <h2>User defined Clocks with custom time offset</h2>
-    <div class="add-gmt">
-      <input type="text" id="gmt-offset" placeholder="+5.5">
-      <button id="add-gmt">Add Clock</button>
-    </div>
-    <div class="clock-grid" id="custom-grid"></div>
+<!-- 4️⃣ Countdown -->
+<div class="clock" id="countdown">
+  <h3>ETA</h3>
+  <div class="time" id="time-remaining">--:--:--</div>
+  <div class="controls">
+    <input type="datetime-local" id="target-dt">
+    <button id="start-cd">Start</button>
+    <button id="reset-cd">Reset</button>
   </div>
 </div>
 
 <script>
-/* ---------- 1️⃣  PRESET_ZONES – 12 fixed zones to display ---------- */
-const PRESET_ZONES = [
-  'America/New_York',
-  'America/Chicago',
-  'America/Denver',
-  'America/Los_Angeles',
-  'Pacific/Honolulu',
-  'Europe/London',
-  'Europe/Paris',
-  'Europe/Berlin',
-  'Europe/Moscow',
-  'Asia/Shanghai',
-  'Asia/Tokyo',
-  'Australia/Sydney'
-];
-
-/* ---------- 2️⃣  All IANA zones (used for the user drop‑down) ---------- */
-const ALL_ZONES = [
-  /* … a full list – trimmed for brevity … */
-
-    "Africa/Abidjan","Africa/Accra","Africa/Addis_Ababa","Africa/Algiers","Africa/Asmara",
-  "Africa/Bamako","Africa/Bangui","Africa/Banjul","Africa/Bissau","Africa/Blantyre",
-  "Africa/Brazzaville","Africa/Bujumbura","Africa/Cairo","Africa/Casablanca","Africa/Ceuta",
-  "Africa/Conakry","Africa/Dakar","Africa/Dar_es_Salaam","Africa/Djibouti","Africa/Douala",
-  "Africa/El_Aaiun","Africa/Freetown","Africa/Gaborone","Africa/Harare","Africa/Johannesburg",
-  "Africa/Juba","Africa/Kampala","Africa/Khartoum","Africa/Kigali","Africa/Kinshasa",
-  "Africa/Lagos","Africa/Libreville","Africa/Lome","Africa/Luanda","Africa/Lubumbashi",
-  "Africa/Lusaka","Africa/Malabo","Africa/Maputo","Africa/Maseru","Africa/Mbabane",
-  "Africa/Mogadishu","Africa/Monrovia","Africa/Nairobi","Africa/Ndjamena","Africa/Niamey",
-  "Africa/Nouakchott","Africa/Ouagadougou","Africa/Porto-Novo","Africa/Sao_Tome",
-  "Africa/Timbuktu","Africa/Tripoli","Africa/Tunis","Africa/Windhoek",
-  "America/Adak","America/Anchorage","America/Anguilla","America/Antigua","America/Araguaina",
-  "America/Argentina/Buenos_Aires","America/Argentina/Catamarca","America/Argentina/Cordoba",
-  "America/Argentina/Jujuy","America/Argentina/La_Rioja","America/Argentina/Mendoza",
-  "America/Argentina/Rio_Gallegos","America/Argentina/Salta","America/Argentina/San_Juan",
-  "America/Argentina/San_Luis","America/Argentina/Tucuman","America/Argentina/Ushuaia",
-  "America/Aruba","America/Asuncion","America/Atikokan","America/Bahia","America/Bahia_Banderas",
-  "America/Barbados","America/Belem","America/Belize","America/Boa_Vista","America/Bogota",
-  "America/Boise","America/Buenos_Aires","America/Cambridge_Bay","America/Campo_Grande",
-  "America/Cancun","America/Caracas","America/Cayenne","America/Cayman","America/Chicago",
-  "America/Chihuahua","America/Cordoba","America/Costa_Rica","America/Creston","America/Cuiaba",
-  "America/Curacao","America/Danmarkshavn","America/Dawson","America/Dawson_Creek",
-  "America/Denver","America/Detroit","America/Dominica","America/Edmonton","America/Eirunepe",
-  "America/El_Salvador","America/Fort_Nelson","America/Fortaleza","America/Glace_Bay",
-  "America/Godthab","America/Goose_Bay","America/Grand_Turk","America/Grenada","America/Guadeloupe",
-  "America/Guatemala","America/Guayaquil","America/Guyana","America/Halifax","America/Havana",
-  "America/Hermosillo","America/Indiana/Indianapolis","America/Indiana/Knox",
-  "America/Indiana/Marengo","America/Indiana/Petersburg","America/Indiana/Tell_City",
-  "America/Indiana/Vevay","America/Indiana/Vincennes","America/Indiana/Winamac",
-  "America/Inuvik","America/Iqaluit","America/Jamaica","America/Juneau",
-  "America/Kentucky/Louisville","America/Kentucky/Monticello","America/Kralendijk",
-  "America/La_Paz","America/Lima","America/Los_Angeles","America/Lower_Princes",
-  "America/Maceio","America/Managua","America/Manaus","America/Marigot","America/Martinique",
-  "America/Matamoros","America/Mazatlan","America/Menominee","America/Merida",
-  "America/Mexico_City","America/Miquelon","America/Moncton","America/Monterrey",
-  "America/Montevideo","America/Montreal","America/Montserrat","America/Nassau",
-  "America/New_York","America/Nipigon","America/Nome","America/Noronha",
-  "America/North_Dakota/Beulah","America/North_Dakota/Center","America/North_Dakota/New_Salem",
-  "America/Nuuk","America/Ojinaga","America/Panama","America/Pangnirtung",
-  "America/Paramaribo","America/Phoenix","America/Port-au-Prince","America/Port_of_Spain",
-  "America/Porto_Velho","America/Puerto_Rico","America/Punta_Arenas",
-  "America/Rainy_River","America/Rankin_Inlet","America/Recife","America/Regina",
-  "America/Resolute","America/Rio_Branco","America/Santa_Isabel","America/Santarem",
-  "America/Santiago","America/Santo_Domingo","America/Sao_Paulo","America/Scoresbysund",
-  "America/Shiprock","America/Sitka","America/St_Barthelemy","America/St_Johns",
-  "America/St_Kitts","America/St_Lucia","America/St_Thomas","America/St_Vincent",
-  "America/Swift_Current","America/Tegucigalpa","America/Thule","America/Thunder_Bay",
-  "America/Tijuana","America/Toronto","America/Tortola","America/Vancouver",
-  "America/Whitehorse","America/Winnipeg","America/Yakutat","America/Yellowknife",
-  "Antarctica/Casey","Antarctica/Davis","Antarctica/DumontDUrville",
-  "Antarctica/Macquarie","Antarctica/Mawson","Antarctica/Palmer","Antarctica/Rothera",
-  "Antarctica/Syowa","Antarctica/Troll","Antarctica/Vostok",
-  "Arctic/Longyearbyen",
-  "Asia/Aden","Asia/Almaty","Asia/Amman","Asia/Anadyr","Asia/Aqtau",
-  "Asia/Aqtobe","Asia/Ashgabat","Asia/Ashkhabad","Asia/Baghdad","Asia/Bahrain",
-  "Asia/Baku","Asia/Bangkok","Asia/Barnaul","Asia/Beirut","Asia/Bishkek",
-  "Asia/Brunei","Asia/Chita","Asia/Choibalsan","Asia/Colombo","Asia/Damascus",
-  "Asia/Dhaka","Asia/Dili","Asia/Dubai","Asia/Dushanbe","Asia/Famagusta",
-  "Asia/Gaza","Asia/Hebron","Asia/Ho_Chi_Minh","Asia/Hong_Kong","Asia/Hovd",
-  "Asia/Irkutsk","Asia/Jakarta","Asia/Jayapura","Asia/Jerusalem","Asia/Kabul",
-  "Asia/Kamchatka","Asia/Karachi","Asia/Kathmandu","Asia/Khandy","Asia/Kolkata",
-  "Asia/Krasnoyarsk","Asia/Kuala_Lumpur","Asia/Kuching","Asia/Kuwait","Asia/Macau",
-  "Asia/Magadan","Asia/Makassar","Asia/Manila","Asia/Muscat","Asia/Nicosia",
-  "Asia/Novokuznetsk","Asia/Novosibirsk","Asia/Omsk","Asia/Oral","Asia/Phnom_Penh",
-  "Asia/Pontianak","Asia/Pyongyang","Asia/Qatar","Asia/Qyzylorda","Asia/Riyadh",
-  "Asia/Saigon","Asia/Sakhalin","Asia/Samarkand","Asia/Seoul","Asia/Shanghai",
-  "Asia/Singapore","Asia/Srednekolymsk","Asia/Taipei","Asia/Tashkent","Asia/Tbilisi",
-  "Asia/Tehran","Asia/Tel_Aviv","Asia/Thimphu","Asia/Tokyo","Asia/Tomsk",
-  "Asia/Ulaanbaatar","Asia/Urumqi","Asia/Ust-Nera","Asia/Vientiane","Asia/Vladivostok",
-  "Asia/Yakutsk","Asia/Yekaterinburg","Asia/Yerevan",
-  "Asia/Almaty","Asia/Amman","Asia/Anadyr","Asia/Bishkek","Asia/Chita",
-  "Asia/Colombo","Asia/Ha","Asia/Hanoi","Asia/Jakarta","Asia/Jayapura",
-  "Asia/Krasnoyarsk","Asia/Kuala_Lumpur","Asia/Kuching","Asia/Macau","Asia/Makassar",
-  "Asia/Manila","Asia/Novokuznetsk","Asia/Novosibirsk","Asia/Omsk","Asia/Oral",
-  "Asia/Phnom_Penh","Asia/Pontianak","Asia/Qyzylorda","Asia/Samarkand","Asia/Sakhalin",
-  "Asia/Singapore","Asia/Tashkent","Asia/Tbilisi","Asia/Ulaanbaatar","Asia/Urumqi",
-  "Asia/Ust-Nera","Asia/Vientiane","Asia/Vladivostok"
-  // add the rest you need
-];
-
-/* ---------- 3️⃣  Countdown Timer logic ---------- */
-let countdown = 0, countdownInterval = null;
-const display = document.getElementById('cnt-display');
-
-function formatSec(s){
-  const hh = String(Math.floor(s/3600)).padStart(2,'0');
-  const mm = String(Math.floor((s%3600)/60)).padStart(2,'0');
-  const ss = String(s%60).padStart(2,'0');
-  return `${hh}:${mm}:${ss}`;
+/* ---------- 1️⃣ EST Clock ---------- */
+const estEl = document.getElementById('time-est');
+function updateEST(){
+  const now = new Date();
+  const est = new Intl.DateTimeFormat('en-US', {
+    hour:'2-digit', minute:'2-digit', second:'2-digit',
+    hour12:false, timeZone:'America/New_York'
+  }).format(now);
+  estEl.textContent = est;
 }
-function updateCountdown(){ display.textContent = formatSec(countdown); }
+setInterval(updateEST, 1000);
+updateEST();
 
-document.getElementById('cnt-start').onclick = () => {
-  const h = +document.getElementById('cnt-hours').value||0;
-  const m = +document.getElementById('cnt-minutes').value||0;
-  const s = +document.getElementById('cnt-seconds').value||0;
-  countdown = h*3600 + m*60 + s;
-  updateCountdown();
+/* ---------- 2️⃣ Custom Clock 1 & 2 ---------- */
+const customClocks = [
+  {offsetInput:'offset-c1', setBtn:'set-c1', timeEl:'time-c1', displayEl:'clock-c1'},
+  {offsetInput:'offset-c2', setBtn:'set-c2', timeEl:'time-c2', displayEl:'clock-c2'}
+];
+customClocks.forEach(cfg=>{
+  const offsetEl = document.getElementById(cfg.offsetInput);
+  const btn = document.getElementById(cfg.setBtn);
+  const timeEl = document.getElementById(cfg.timeEl);
+  let minutesOffset = null;        // minutes from UTC
+  let interval = null;
+
+  function setOffset(){
+    const val = offsetEl.value.trim();
+    if(!val) return alert('Enter a GMT offset (e.g. +5.5, -3)');
+    const m = parseOffset(val);
+    if(m===null) return alert('Invalid offset. Use +5.5 or -8');
+    minutesOffset = m;
+    if(interval) clearInterval(interval);
+    interval = setInterval(updateCustom, 1000);
+    updateCustom();
+  }
+
+  function updateCustom(){
+    const utcNow = new Date();
+    const localMs = utcNow.getTime() + minutesOffset*60*1000;
+    const local = new Date(localMs);
+    const hh = pad(local.getUTCHours());
+    const mm = pad(local.getUTCMinutes());
+    const ss = pad(local.getUTCSeconds());
+    timeEl.textContent = `${hh}:${mm}:${ss}`;
+  }
+
+  btn.addEventListener('click', setOffset);
+});
+
+/* Parse strings like "+5.5" or "-3" to minutes (null on failure) */
+function parseOffset(str){
+  const m = str.match(/^([+-]?)(\d+)(?:\.(\d+))?$/);
+  if(!m) return null;
+  let sign = m[1]==='-'? -1 : 1;
+  let hours = parseInt(m[2],10);
+  let minutes = m[3] ? Math.round(parseInt(m[3],10)* (m[3].length===1? 6 : 10)) : 0; // e.g. .5 -> 30
+  // if fraction is like .25 we treat 25*6 = 150? better: treat fraction as decimal fraction of hour
+  if(m[3] && m[3].length===1) { minutes = Math.round(parseInt(m[3],10)*60); }
+  return sign*(hours*60 + minutes);
+}
+
+/* Helper to pad numbers */
+function pad(n){return n.toString().padStart(2,'0');}
+
+/* ---------- 3️⃣ Countdown Timer ---------- */
+const targetInput = document.getElementById('target-dt');
+const remainingEl = document.getElementById('time-remaining');
+let countdownInterval = null;
+let targetTime = null;
+
+function startCountdown(){
+  if(!targetTime) return;
   clearInterval(countdownInterval);
-  countdownInterval = setInterval(() => {
-    if(countdown>0){ countdown--; updateCountdown(); }
-    else clearInterval(countdownInterval);
-  },1000);
-};
-document.getElementById('cnt-reset').onclick = () => {
-  clearInterval(countdownInterval); countdown=0; updateCountdown();
-};
-
-/* ---------- 4️⃣  Clock element builder ---------- */
-function buildClock(zone, label){
-  const d = document.createElement('div'); d.className='clock';
-  d.dataset.zone = zone;
-  const h3 = document.createElement('h3'); h3.textContent=label;
-  const p  = document.createElement('p'); p.className='time';
-  d.appendChild(h3); d.appendChild(p);
-  return d;
+  countdownInterval = setInterval(tickCountdown, 1000);
+  tickCountdown();
+}
+function resetCountdown(){
+  clearInterval(countdownInterval);
+  remainingEl.textContent = '--:--:--';
+  targetTime = null;
+  targetInput.value = '';
 }
 
-/* ---------- 5️⃣  12 fixed clocks ---------- */
-const fixedGrid = document.getElementById('fixed-grid');
-PRESET_ZONES.forEach(z => fixedGrid.appendChild(buildClock(z, z)));
-
-/* ---------- 6️⃣  User‑selected zone ---------- */
-const userZoneSelect = document.getElementById('zone-select');
-const userGrid = document.getElementById('user-grid');
-let userZone = null;   // {zone:string, element:HTMLElement}
-
-function updateUserZoneClock(){
-  if(!userZone) return;
+function tickCountdown(){
+  if(!targetTime) return;
   const now = new Date();
-  const timeStr = now.toLocaleTimeString('en-US',{timeZone:userZone.zone,hour12:false});
-  userZone.element.querySelector('.time').textContent = timeStr;
-}
-function showUserZone(zone){
-  if(userZone) userGrid.removeChild(userZone.element);
-  const el = buildClock(zone, zone);
-  userGrid.appendChild(el);
-  userZone = {zone, element:el};
-}
-userZoneSelect.addEventListener('change', e=>showUserZone(e.target.value));
-ALL_ZONES.forEach(z=>userZoneSelect.appendChild(new Option(z,z)));
-
-/* ---------- 7️⃣  Custom User clocks ---------- */
-const customClocks = []; // {offsetMin:number, element:HTMLElement}
-document.getElementById('add-gmt').onclick = () => {
-  const s = document.getElementById('gmt-offset').value.trim();
-  if(!s) return;
-  const m = parseGMTOffset(s);          // helper below
-  const el = buildClock(`Custom ${s}`, `Custom ${s}`);
-  // add a small remove button inside the clock card
-  const rem = document.createElement('button');
-  rem.textContent='✕';
-  rem.onclick = () => { customGrid.removeChild(el); customClocks.splice(customClocks.findIndex(c=>c.element===el),1); };
-  el.appendChild(rem);
-  document.getElementById('custom-grid').appendChild(el);
-  customClocks.push({offsetMin:m, element:el});
-};
-function parseGMTOffset(str){
-  const m = str.match(/^([+-])?(\d+)(?:\.(\d+))?$/);
-  if(!m) throw new Error('bad');
-  const sign = m[1]==='-'?-1:1;
-  const h = +m[2], min = m[3] ? Math.round(parseFloat('0.'+m[3])*60) : 0;
-  return sign*(h*60+min);
+  let diff = targetTime - now;
+  if(diff <= 0){
+    remainingEl.textContent = '00:00:00';
+    clearInterval(countdownInterval);
+    return;
+  }
+  const h = Math.floor(diff/(3600*1000));
+  const m = Math.floor((diff%(3600*1000))/(60*1000));
+  const s = Math.floor((diff%(60*1000))/1000);
+  remainingEl.textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
 }
 
-/* ---------- 8️⃣  Global time updater ---------- */
-function updateTimes(){
-  const now = new Date();
-  // fixed clocks
-  PRESET_ZONES.forEach(z=>{
-    const el = fixedGrid.querySelector(`[data-zone="${z}"]`);
-    if(el){ el.querySelector('.time').textContent = now.toLocaleTimeString('en-US',{timeZone:z,hour12:false}); }
-  });
-  // user zone
-  updateUserZoneClock();
-  // custom GMT
-  customClocks.forEach(c=>{
-    const utc = now.getTime();
-    const tz = new Date(utc + c.offsetMin*60*1000);
-    c.element.querySelector('.time').textContent = tz.toLocaleTimeString('en-US',{hour12:false});
-  });
-}
-updateTimes(); setInterval(updateTimes,1000);
+document.getElementById('start-cd').addEventListener('click',()=>{
+  const dt = targetInput.value;
+  if(!dt) return alert('Please choose a target date/time.');
+  targetTime = new Date(dt);
+  if(isNaN(targetTime)) return alert('Invalid date/time.');
+  startCountdown();
+});
+
+document.getElementById('reset-cd').addEventListener('click', resetCountdown);
+
+
+
 </script>
+
+<h2>Note: The clocks above will function correctly only if the workstation’s clock is set to Zulu (UTC) time.</h2>
 </body>
 </html>
