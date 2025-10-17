@@ -4,17 +4,54 @@
 <meta charset="utf-8">
 <title>CSO Clocks</title>
 <style>
-  body{font-family:Arial,Helvetica,sans-serif;margin:20px;background:#f4f4f4}
+  :root{
+    --body-font:Arial,Helvetica,sans-serif;
+    --bg:#f4f4f4;
+    --card:#fff;
+    --shadow:0 1px 3px rgba(0,0,0,.15);
+    --radius:6px;
+    --padding:12px;
+    --margin:20px;
+    --btn-bg:#2d89ef;
+    --btn-hover:#1b5fbd;
+    --btn-radius:4px;
+  }
+  body{
+    font-family:var(--body-font);
+    margin:var(--margin);
+    background:var(--bg);
+  }
+  h1{font-size:1.8rem;margin:0 0 1.5rem}
   h2{margin:12px 0 6px}
-  .clock{background:#fff;border-radius:6px;padding:12px;margin-bottom:16px;
-         box-shadow:0 1px 3px rgba(0,0,0,.15)}
+  .clock{
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:var(--padding);
+    margin-bottom:1rem;
+    box-shadow:var(--shadow);
+  }
   .clock h3{margin:0 0 4px;font-size:1.1rem}
   .time{font-size:1.6rem;font-weight:600}
-  .controls{margin-top:8px}
+  .controls{margin-top:.5rem}
   input[type="number"],input[type="text"],input[type="datetime-local"]{
-    padding:4px 6px;font-size:0.9rem;margin-right:6px;width:140px}
-  button{padding:5px 10px;font-size:0.9rem;background:#2d89ef;color:#fff;border:none;border-radius:4px}
-  button:hover{background:#1b5fbd}
+    padding:.4rem .6rem;font-size:.9rem;margin-right:.6rem;width:140px}
+  button{
+    padding:.5rem 1rem;font-size:.9rem;
+    background:var(--btn-bg);color:#fff;border:none;
+    border-radius:var(--btn-radius)
+  }
+  button:hover{background:var(--btn-hover)}
+
+  /* Mobile layout – stack the clocks */
+  @media (max-width:480px){
+    body{margin:1rem}
+    input[type="number"],input[type="text"],input[type="datetime-local"]{
+      width:calc(100% - 1rem);
+      margin-bottom:.5rem
+    }
+    button{width:100%;margin-bottom:.5rem}
+    .controls{display:flex;flex-direction:column}
+  }
 </style>
 </head>
 <body>
@@ -23,16 +60,17 @@
 
 <!-- 1️⃣ EST Clock -->
 <div class="clock" id="clock-est">
-  <h3> Washington D.C.</h3>
+  <h3>Washington D.C.</h3>
   <div class="time" id="time-est">--:--:--</div>
 </div>
 
 <!-- 2️⃣ Custom Clock 1 -->
 <div class="clock" id="clock-c1">
-  <h3> Origin Time </h3>
+  <h3>Origin Time</h3>
   <div class="time" id="time-c1">--:--:--</div>
   <div class="controls">
-    <input type="text" id="offset-c1" placeholder="+5.5 or -3">
+    <input type="number" id="offset-c1-h" placeholder="±hh" min="-12" max="14" step="1">
+    <input type="number" id="offset-c1-m" placeholder="mm" min="0" max="59" step="1">
     <button id="set-c1">Set</button>
   </div>
 </div>
@@ -42,14 +80,15 @@
   <h3>Destination Time</h3>
   <div class="time" id="time-c2">--:--:--</div>
   <div class="controls">
-    <input type="text" id="offset-c2" placeholder="+2 or -8.5">
+    <input type="number" id="offset-c2-h" placeholder="±hh" min="-12" max="14" step="1">
+    <input type="number" id="offset-c2-m" placeholder="mm" min="0" max="59" step="1">
     <button id="set-c2">Set</button>
   </div>
 </div>
 
 <!-- 4️⃣ Countdown -->
 <div class="clock" id="countdown">
-  <h3>ETA</h3>
+  <h3>ETA (Zulu)</h3>
   <div class="time" id="time-remaining">--:--:--</div>
   <div class="controls">
     <input type="datetime-local" id="target-dt">
@@ -74,22 +113,31 @@ updateEST();
 
 /* ---------- 2️⃣ Custom Clock 1 & 2 ---------- */
 const customClocks = [
-  {offsetInput:'offset-c1', setBtn:'set-c1', timeEl:'time-c1', displayEl:'clock-c1'},
-  {offsetInput:'offset-c2', setBtn:'set-c2', timeEl:'time-c2', displayEl:'clock-c2'}
+  {hoursInput:'offset-c1-h', minsInput:'offset-c1-m', setBtn:'set-c1', timeEl:'time-c1'},
+  {hoursInput:'offset-c2-h', minsInput:'offset-c2-m', setBtn:'set-c2', timeEl:'time-c2'}
 ];
 customClocks.forEach(cfg=>{
-  const offsetEl = document.getElementById(cfg.offsetInput);
+  const hEl = document.getElementById(cfg.hoursInput);
+  const mEl = document.getElementById(cfg.minsInput);
   const btn = document.getElementById(cfg.setBtn);
   const timeEl = document.getElementById(cfg.timeEl);
-  let minutesOffset = null;        // minutes from UTC
+  let minutesOffset = null;
   let interval = null;
 
   function setOffset(){
-    const val = offsetEl.value.trim();
-    if(!val) return alert('Enter a GMT offset (e.g. +5.5, -3)');
-    const m = parseOffset(val);
-    if(m===null) return alert('Invalid offset. Use +5.5 or -8');
-    minutesOffset = m;
+    const hVal = hEl.value.trim();
+    const mVal = mEl.value.trim();
+
+    if(hVal==='') return alert('Enter hour offset (±hh).');
+    if(mVal==='') return alert('Enter minutes offset (0‑59).');
+
+    const h = parseInt(hVal,10);
+    const m = parseInt(mVal,10);
+    if(isNaN(h) || isNaN(m) || m>59 || m<0)
+      return alert('Hour must be ±12‑14, minutes 0‑59.');
+
+    const sign = hVal[0]==='-' ? -1 : 1;
+    minutesOffset = sign*(Math.abs(h)*60 + m);
     if(interval) clearInterval(interval);
     interval = setInterval(updateCustom, 1000);
     updateCustom();
@@ -107,18 +155,6 @@ customClocks.forEach(cfg=>{
 
   btn.addEventListener('click', setOffset);
 });
-
-/* Parse strings like "+5.5" or "-3" to minutes (null on failure) */
-function parseOffset(str){
-  const m = str.match(/^([+-]?)(\d+)(?:\.(\d+))?$/);
-  if(!m) return null;
-  let sign = m[1]==='-'? -1 : 1;
-  let hours = parseInt(m[2],10);
-  let minutes = m[3] ? Math.round(parseInt(m[3],10)* (m[3].length===1? 6 : 10)) : 0; // e.g. .5 -> 30
-  // if fraction is like .25 we treat 25*6 = 150? better: treat fraction as decimal fraction of hour
-  if(m[3] && m[3].length===1) { minutes = Math.round(parseInt(m[3],10)*60); }
-  return sign*(hours*60 + minutes);
-}
 
 /* Helper to pad numbers */
 function pad(n){return n.toString().padStart(2,'0');}
@@ -145,32 +181,30 @@ function resetCountdown(){
 function tickCountdown(){
   if(!targetTime) return;
   const now = new Date();
-  let diff = targetTime - now;
-  if(diff <= 0){
-    remainingEl.textContent = '00:00:00';
+  const diff = targetTime - now;
+  if(diff<=0){
     clearInterval(countdownInterval);
+    remainingEl.textContent = '00:00:00';
     return;
   }
-  const h = Math.floor(diff/(3600*1000));
-  const m = Math.floor((diff%(3600*1000))/(60*1000));
-  const s = Math.floor((diff%(60*1000))/1000);
-  remainingEl.textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
+  const d = new Date(diff);
+  const hh = pad(d.getUTCHours());
+  const mm = pad(d.getUTCMinutes());
+  const ss = pad(d.getUTCSeconds());
+  remainingEl.textContent = `${hh}:${mm}:${ss}`;
 }
 
-document.getElementById('start-cd').addEventListener('click',()=>{
-  const dt = targetInput.value;
-  if(!dt) return alert('Please choose a target date/time.');
-  targetTime = new Date(dt);
-  if(isNaN(targetTime)) return alert('Invalid date/time.');
+document.getElementById('start-cd').addEventListener('click', ()=>{
+  const val = targetInput.value;
+  if(!val) return alert('Choose a future date/time.');
+  targetTime = new Date(val);
+  if(targetTime < new Date()) return alert('Time must be in the future.');
   startCountdown();
 });
-
 document.getElementById('reset-cd').addEventListener('click', resetCountdown);
-
-
-
 </script>
 
-<h2>Note: The clocks above will function correctly only if the workstation’s clock is set to Zulu (UTC) time.</h2>
+<p style="font-size:.8rem;color:#555">
+  <strong>Note:</strong> The ETA clock uses the Workstations system clock. It will only function properly if the Workstation is set to Zulu.</p>
 </body>
 </html>
