@@ -60,13 +60,19 @@
 
 <!-- 1️⃣ EST Clock -->
 <div class="clock" id="clock-est">
-  <h3>Washington D.C.</h3>
+  <h3>Washington D.C.</h3>
   <div class="time" id="time-est">--:--:--</div>
 </div>
 
-<!-- 2️⃣ Custom Clock 1 -->
+<!-- 2️⃣ London Clock -->
+<div class="clock" id="clock-london">
+  <h3>GMT (Zulu)</h3>
+  <div class="time" id="time-london">--:--:--</div>
+</div>
+
+<!-- 3️⃣ Custom Clock 1 -->
 <div class="clock" id="clock-c1">
-  <h3>Origin Time</h3>
+  <h3>Origin GMT OffSet</h3>
   <div class="time" id="time-c1">--:--:--</div>
   <div class="controls">
     <input type="number" id="offset-c1-h" placeholder="±hh" min="-12" max="14" step="1">
@@ -75,9 +81,9 @@
   </div>
 </div>
 
-<!-- 3️⃣ Custom Clock 2 -->
+<!-- 4️⃣ Custom Clock 2 -->
 <div class="clock" id="clock-c2">
-  <h3>Destination Time</h3>
+  <h3>Destination GMT Offset</h3>
   <div class="time" id="time-c2">--:--:--</div>
   <div class="controls">
     <input type="number" id="offset-c2-h" placeholder="±hh" min="-12" max="14" step="1">
@@ -86,9 +92,9 @@
   </div>
 </div>
 
-<!-- 4️⃣ Countdown -->
+<!-- 5️⃣ Countdown -->
 <div class="clock" id="countdown">
-  <h3>ETA (Zulu)</h3>
+  <h3>ETA to Destination</h3>
   <div class="time" id="time-remaining">--:--:--</div>
   <div class="controls">
     <input type="datetime-local" id="target-dt">
@@ -111,100 +117,97 @@ function updateEST(){
 setInterval(updateEST, 1000);
 updateEST();
 
-/* ---------- 2️⃣ Custom Clock 1 & 2 ---------- */
+/* ---------- 2️⃣ London Clock ---------- */
+const londonEl = document.getElementById('time-london');
+function updateLondon(){
+  const now = new Date();
+  const london = new Intl.DateTimeFormat('en-GB', {
+    hour:'2-digit', minute:'2-digit', second:'2-digit',
+    hour12:false, timeZone:'Etc/UTC'
+  }).format(now);
+  londonEl.textContent = london;
+}
+setInterval(updateLondon, 1000);
+updateLondon();
+
+/* ---------- 3️⃣ Custom Clock 1 & 2 ---------- */
 const customClocks = [
   {hoursInput:'offset-c1-h', minsInput:'offset-c1-m', setBtn:'set-c1', timeEl:'time-c1'},
   {hoursInput:'offset-c2-h', minsInput:'offset-c2-m', setBtn:'set-c2', timeEl:'time-c2'}
 ];
+const pad = n=>String(n).padStart(2,'0');
+const padSec = (n)=>String(n).padStart(2,'0');
 customClocks.forEach(cfg=>{
-  const hEl = document.getElementById(cfg.hoursInput);
-  const mEl = document.getElementById(cfg.minsInput);
-  const btn = document.getElementById(cfg.setBtn);
-  const timeEl = document.getElementById(cfg.timeEl);
-  let minutesOffset = null;
-  let interval = null;
+  const hIn = document.getElementById(cfg.hoursInput);
+  const mIn = document.getElementById(cfg.minsInput);
+  const setBtn = document.getElementById(cfg.setBtn);
+  const timeDiv = document.getElementById(cfg.timeEl);
+  let intervalId = null;
 
-  function setOffset(){
-    const hVal = hEl.value.trim();
-    const mVal = mEl.value.trim();
+  setBtn.addEventListener('click',()=>{
+    // validation
+    const hVal = Number(hIn.value);
+    const mVal = Number(mIn.value);
+    if(isNaN(hVal) || isNaN(mVal) ||
+       hVal < -12 || hVal > 14 || mVal < 0 || mVal > 59){
+      alert('Please enter a valid offset: ±hh (‑12 … 14) and mm (0‑59).');
+      return;
+    }
+    if(intervalId) clearInterval(intervalId);
 
-    if(hVal==='') return alert('Enter hour offset (±hh).');
-    if(mVal==='') return alert('Enter minutes offset (0‑59).');
-
-    const h = parseInt(hVal,10);
-    const m = parseInt(mVal,10);
-    if(isNaN(h) || isNaN(m) || m>59 || m<0)
-      return alert('Hour must be ±12‑14, minutes 0‑59.');
-
-    const sign = hVal[0]==='-' ? -1 : 1;
-    minutesOffset = sign*(Math.abs(h)*60 + m);
-    if(interval) clearInterval(interval);
-    interval = setInterval(updateCustom, 1000);
-    updateCustom();
-  }
-
-  function updateCustom(){
-    const utcNow = new Date();
-    const localMs = utcNow.getTime() + minutesOffset*60*1000;
-    const local = new Date(localMs);
-    const hh = pad(local.getUTCHours());
-    const mm = pad(local.getUTCMinutes());
-    const ss = pad(local.getUTCSeconds());
-    timeEl.textContent = `${hh}:${mm}:${ss}`;
-  }
-
-  btn.addEventListener('click', setOffset);
+    intervalId = setInterval(()=> {
+      const now = new Date();
+      const utcMs = now.getTime() + now.getTimezoneOffset()*60000;
+      const targetMs = utcMs + (hVal*3600 + mVal*60)*1000;
+      const target = new Date(targetMs);
+      const hh = pad(target.getHours());
+      const mm = pad(target.getMinutes());
+      const ss = padSec(target.getSeconds());
+      timeDiv.textContent = `${hh}:${mm}:${ss}`;
+    }, 1000);
+    // set immediately
+    const now = new Date();
+    const utcMs = now.getTime() + now.getTimezoneOffset()*60000;
+    const targetMs = utcMs + (hVal*3600 + mVal*60)*1000;
+    const target = new Date(targetMs);
+    timeDiv.textContent = `${pad(target.getHours())}:${pad(target.getMinutes())}:${padSec(target.getSeconds())}`;
+  });
 });
 
-/* Helper to pad numbers */
-function pad(n){return n.toString().padStart(2,'0');}
-
-/* ---------- 3️⃣ Countdown Timer ---------- */
-const targetInput = document.getElementById('target-dt');
+/* ---------- 4️⃣ Countdown ---------- */
+const targetDtInput = document.getElementById('target-dt');
 const remainingEl = document.getElementById('time-remaining');
+const startBtn = document.getElementById('start-cd');
+const resetBtn = document.getElementById('reset-cd');
 let countdownInterval = null;
-let targetTime = null;
 
-function startCountdown(){
-  if(!targetTime) return;
-  clearInterval(countdownInterval);
-  countdownInterval = setInterval(tickCountdown, 1000);
-  tickCountdown();
+function updateCountdown(){
+  const target = new Date(targetDtInput.value);
+  if(isNaN(target)) return;
+  const now = new Date();
+  let diff = target - now;
+  if(diff < 0){ diff = 0; clearInterval(countdownInterval); }
+  const hrs = Math.floor(diff/(3600*1000));
+  const mins = Math.floor((diff%(3600*1000))/(60*1000));
+  const secs = Math.floor((diff%(60*1000))/1000);
+  remainingEl.textContent =
+    `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
 }
-function resetCountdown(){
+startBtn.addEventListener('click',()=>{
+  if(countdownInterval) clearInterval(countdownInterval);
+  updateCountdown();
+  countdownInterval = setInterval(updateCountdown, 1000);
+});
+resetBtn.addEventListener('click',()=>{
   clearInterval(countdownInterval);
   remainingEl.textContent = '--:--:--';
-  targetTime = null;
-  targetInput.value = '';
-}
-
-function tickCountdown(){
-  if(!targetTime) return;
-  const now = new Date();
-  const diff = targetTime - now;
-  if(diff<=0){
-    clearInterval(countdownInterval);
-    remainingEl.textContent = '00:00:00';
-    return;
-  }
-  const d = new Date(diff);
-  const hh = pad(d.getUTCHours());
-  const mm = pad(d.getUTCMinutes());
-  const ss = pad(d.getUTCSeconds());
-  remainingEl.textContent = `${hh}:${mm}:${ss}`;
-}
-
-document.getElementById('start-cd').addEventListener('click', ()=>{
-  const val = targetInput.value;
-  if(!val) return alert('Choose a future date/time.');
-  targetTime = new Date(val);
-  if(targetTime < new Date()) return alert('Time must be in the future.');
-  startCountdown();
+  targetDtInput.value = '';
 });
-document.getElementById('reset-cd').addEventListener('click', resetCountdown);
 </script>
 
-<p style="font-size:.8rem;color:#555">
-  <strong>Note:</strong> The ETA clock uses the Workstations system clock. It will only function properly if the Workstation is set to Zulu.</p>
+<p style="font-size:.9rem;color:#555">
+  All clocks show the current time in real time.
+  <br>Custom clocks let you choose an exact hour + minute offset (no decimals).
+  <br>On phones the layout stacks into a single column for easy viewing.</p>
 </body>
 </html>
